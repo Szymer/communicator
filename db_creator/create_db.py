@@ -19,11 +19,16 @@ CREATE TABLE messages (
 id serial primary key,
 from_id int NOT NULL ,
 to_id int NOT NULL , 
+text text,
 creation_date timestamp default now(),
 FOREIGN KEY (from_id) REFERENCES users (id),
 FOREIGN KEY (to_id) REFERENCES users (id)
 );
 
+"""
+
+"""
+cerat data base
 """
 
 
@@ -50,6 +55,11 @@ def create_db(sql):
         cursor.close()
 
 
+"""
+cerat table in database
+"""
+
+
 def create_table(sql, db):
     conn = psycopg2.connect(
         user=USER,
@@ -74,3 +84,5 @@ def run():
 
 
 run()
+# if __name__ == "__main__":
+#     run()

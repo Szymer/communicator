@@ -10,19 +10,18 @@ CREATE DATABASE communicator_db;
 sql_crate_tab_users = """
 CREATE TABLE users (
 id serial primary key,
-username varchar(255),
+username varchar(255) UNIQUE ,
 hashed_password varchar(80)
 );
 """
 sql_crate_tab_msg = """
 CREATE TABLE messages (
 id serial primary key,
-from_id int NOT NULL ,
-to_id int NOT NULL , 
+from_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+to_id INTEGER REFERENCES users(id) ON DELETE CASCADE,  
 text text,
-creation_date timestamp default now(),
-FOREIGN KEY (from_id) REFERENCES users (id),
-FOREIGN KEY (to_id) REFERENCES users (id)
+creation_date timestamp default now()
+
 );
 
 """

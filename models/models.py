@@ -17,31 +17,41 @@ class User:
     def hashed_password(self):
         return self._hashed_password
 
+    def set_password(self, password, salt=""):
+        self._hashed_password = clcrypto.hash_password(password, salt)
+
     @hashed_password.setter
     def hashed_password(self, new_password):
-        self._hashed_password = clcrypto.hash_password(new_password)
+        self.set_password(new_password)
 
     def save_to_db(self, cursor):
         if self._id == -1:
             sql = """ INSERT INTO users( username, hashed_password)
-                        VALUES (%s, %s) RETURNING id;
-                """
-            values = (self.username, self.hashed_password)
+                        VALUES (%s, %s) RETURNING id """
+            values = (f"{self.username}", f"{self.hashed_password}")
             cursor.execute(sql, values)
+            cursor.close
             self._id = cursor.fetchone()[0]
+            cursor.close()
             return True
 
         else:
+            sql = """UPDATE Users SET username=%s, hashed_password=%s
+                                       WHERE id=%s"""
+            values = (self.username, self.hashed_password, self.id)
+            cursor.execute(sql, values)
+            return True
 
             return False
 
     @staticmethod
     def load_user_by_username(cursor, username):
-        sql = """ SELECT *  FROM users
+        sql = """ SELECT id, username, hashed_password  FROM users
                 WHERE username=%s      
         """
+
         cursor.execute(sql, (username,))
-        data = cursor.fetchtone()
+        data = cursor.fetchone()
         if data:
             id_, username, hashed_password = data
             loaded_user = User(username)
@@ -57,7 +67,7 @@ class User:
                         WHERE id=%s      
                 """
         cursor.execute(sql, (id_,))
-        data = cursor.fetchtone()
+        data = cursor.fetchone()
         if data:
             id_, username, hashed_password = data
             loaded_user = User(username)
@@ -127,21 +137,12 @@ class Messages:
             msg.append(loaded_msg)
         return msg
 
+#
+# new_user16 = User("Adam56665")
+#
+# new_user16.save_to_db(db_connection.cur())
+# c = User.load_all_users(db_connection.cur())
+# print(c)
 
-USER = "postgres"
-HOST = "localhost"
-PASSWORD = "coderslab"
-DB = "communicator_db"
-
-new_user2 = User("Adam555")
-# def cur():
-conn = psycopg2.connect(database=DB,
-                        user=USER,
-                        password=PASSWORD,
-                        host=HOST
-                        )
-with conn.cursor() as cur:
-    new_user2.save_to_db(cur)
-print(new_user2.id)
 
 # if __name__ == "__main__":

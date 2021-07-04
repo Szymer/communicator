@@ -58,8 +58,6 @@ class User:
             loaded_user._id = id_
             loaded_user._hashed_password = hashed_password
             return loaded_user
-        else:
-            return None
 
     @staticmethod
     def load_user_by_id(cursor, id_):
@@ -99,6 +97,9 @@ class User:
         self._id = -1
         return True
 
+    def __str__(self):
+        return f" Id: [{self._id}] | User Name:{self.username} | Password:   {self.hashed_password}"
+
 
 class Messages:
     def __init__(self, from_id='', to_id='', text=''):
@@ -113,10 +114,12 @@ class Messages:
             sql = """ INSERT INTO messages( from_id, to_id, text)
                         VALUES (%s, %s, %s) RETURNING id, creation_date
                 """
-            values = (self.from_id, self.to_id)
+            values = (self.from_id, self.to_id, self.text)
             cursor.execute(sql, values)
-            self.creation_date = cursor.fetchtone()[1]
-            self._id = cursor.fetchtone()[0]
+            creation = cursor.fetchone()[1]
+            new_id = cursor.fetchone()[0]
+            self.creation_date = creation
+            self._id = new_id
             return True
         else:
             return False
@@ -136,6 +139,11 @@ class Messages:
             loaded_msg.creation_date = creation_date
             msg.append(loaded_msg)
         return msg
+
+    def __str__(self):
+        return f" Message from: {self.from_id} to: {self.to_id} \n" \
+               f"{self.text}\n" \
+               f" "
 
 #
 # new_user16 = User("Adam56665")

@@ -1,5 +1,4 @@
 import argparse
-# import db_connection
 import psycopg2
 from models.models import User
 from clcrypto import check_password
@@ -21,12 +20,10 @@ parser.add_argument("-n", "--new_pass", help="new password (min 8 characters)")
 parser.add_argument("-l", "--list", help="users list", action="store_true")
 parser.add_argument("-d", "--delete", help="delete user", action="store_true")
 parser.add_argument("-e", "--edit", help="edit user", action="store_true")
+
 args = parser.parse_args()
 
-"""
-creating new unique user 
-password should have min 8 chars
-"""
+
 
 
 def check_if_user_exist_in_db(cur, username):
@@ -123,9 +120,4 @@ if __name__ == '__main__':
     except psycopg2.OperationalError as err:
         print("Connection Error: ", err)
 
-# create_new_user(cursor, args.username, args.password)
 
-# a = check_if_user_exist_in_db(cursor, args.username)
-# print(a)
-# b = validate_password(args.password)
-# print(b)

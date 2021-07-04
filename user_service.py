@@ -1,24 +1,25 @@
 import argparse
 # import db_connection
 import psycopg2
-
 from models.models import User
 from clcrypto import check_password
 
-# cursor = db_connection.cur()
+""" cursor = cur
+db connection variables below 
+"""
 USER = "postgres"
 HOST = "localhost"
 PASSWORD = "coderslab"
 DB = "communicator_db"
 """
-parser aruments
+parser arguments
 """
 parser = argparse.ArgumentParser()
 parser.add_argument("-u", "--username", help="username")
 parser.add_argument("-p", "--password", help="password (min 8 characters)")
 parser.add_argument("-n", "--new_pass", help="new password (min 8 characters)")
 parser.add_argument("-l", "--list", help="users list", action="store_true")
-parser.add_argument("-d", "--delete", help="delete user")
+parser.add_argument("-d", "--delete", help="delete user", action="store_true")
 parser.add_argument("-e", "--edit", help="edit user", action="store_true")
 args = parser.parse_args()
 
@@ -31,7 +32,7 @@ password should have min 8 chars
 def check_if_user_exist_in_db(cur, username):
     sql = """ SELECT username FROM users"""
     cur.execute(sql)
-    for row in cursor:
+    for row in cur:
         if username == row[0]:
             return True
     return False
@@ -49,8 +50,9 @@ def create_new_user(cur, username, password):
         if validate_password_len(password):
             new_user = User(username, password)
             new_user.save_to_db(cur)
+            print(f"user {username} added to Data Base")
     else:
-        raise Exception(f"user: {username} allready exist in database")
+        raise Exception(f"user: {username} already exist in database")
 
 
 def check_if_password_is_proper(cur, password, username):
@@ -72,9 +74,27 @@ def pass_change(cur, username, password, n_pass):
             new_password = n_pass
             logged_user.hashed_password = new_password
             logged_user.save_to_db(cur)
-            print("pasword chnaged")
+            print("password changed")
+        else:
+            raise Exception("WRONG Password or Username access denied")
+
+
+def delete_user(cur, username, password):
+    logged_user = User.load_user_by_username(cur, username)
+
+    if not logged_user:
+        raise Exception("WRONG Password or Username access denied")
+    elif check_if_password_is_proper(cur, password, username):
+            logged_user.delete(cur)
+            print(f"user {username} delete from  Data Base")
     else:
         raise Exception("WRONG Password or Username access denied")
+
+
+def print_all_users(cur):
+    all_users = User.load_all_users(cur)
+    for user in all_users:
+        print(user)
 
 
 if __name__ == '__main__':
@@ -90,11 +110,17 @@ if __name__ == '__main__':
 
         if args.username and args.password and args.new_pass and args.edit:
             pass_change(cursor, args.username, args.password, args.new_pass)
-        elif args.username and args.password and not args.edit:
+        elif args.username and args.password and args.delete:
+            delete_user(cursor, args.username, args.password)
+        elif args.username and args.password:
             create_new_user(cursor, args.username, args.password)
+        elif args.list:
+
+            print_all_users(cursor)
         else:
-            print("noop")
-    except psycopg2.errors.OperationalError as err:
+            parser.print_help()
+
+    except psycopg2.OperationalError as err:
         print("Connection Error: ", err)
 
 # create_new_user(cursor, args.username, args.password)

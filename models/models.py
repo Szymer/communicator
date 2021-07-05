@@ -1,7 +1,4 @@
 import clcrypto
-import db_connection
-import psycopg2
-
 
 class User:
     def __init__(self, username="", password="", salt=""):
@@ -30,9 +27,7 @@ class User:
                         VALUES (%s, %s) RETURNING id """
             values = (f"{self.username}", f"{self.hashed_password}")
             cursor.execute(sql, values)
-            cursor.close
             self._id = cursor.fetchone()[0]
-            cursor.close()
             return True
 
         else:
@@ -42,7 +37,7 @@ class User:
             cursor.execute(sql, values)
             return True
 
-            return False
+
 
     @staticmethod
     def load_user_by_username(cursor, username):
@@ -116,10 +111,12 @@ class Messages:
                 """
             values = (self.from_id, self.to_id, self.text)
             cursor.execute(sql, values)
-            creation = cursor.fetchone()[1]
-            new_id = cursor.fetchone()[0]
+            row = cursor.fetchone()
+            creation = row[1]
+            new_id = row[0]
             self.creation_date = creation
             self._id = new_id
+            cursor.close()
             return True
         else:
             return False
@@ -145,12 +142,3 @@ class Messages:
                f"{self.text}\n" \
                f" "
 
-#
-# new_user16 = User("Adam56665")
-#
-# new_user16.save_to_db(db_connection.cur())
-# c = User.load_all_users(db_connection.cur())
-# print(c)
-
-
-# if __name__ == "__main__":

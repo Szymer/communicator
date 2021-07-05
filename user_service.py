@@ -20,6 +20,8 @@ parser.add_argument("-n", "--new_pass", help="new password (min 8 characters)")
 parser.add_argument("-l", "--list", help="users list", action="store_true")
 parser.add_argument("-d", "--delete", help="delete user", action="store_true")
 parser.add_argument("-e", "--edit", help="edit user", action="store_true")
+parser.add_argument("-t", "--to", help=" send to user")
+parser.add_argument("-s", "--send", help="send message", action="store_true")
 
 args = parser.parse_args()
 
@@ -116,6 +118,8 @@ if __name__ == '__main__':
             print_all_users(cursor)
         else:
             parser.print_help()
+        cursor.close()
+        conn.close()
 
     except psycopg2.OperationalError as err:
         print("Connection Error: ", err)

@@ -82,13 +82,14 @@ if __name__ == '__main__':
         conn.autocommit = True
         cursor = conn.cursor()
 
-        if args.username and args.password and args.t and args.s:
-            message_send(cursor, args.username, args.password, args.t)
+        if args.username and args.password and args.to and args.send:
+            message_send(cursor, args.username, args.password, args.to)
         if args.username and args.password and args.list:
-
             messages_list(cursor, args.username, args.password)
         else:
             parser.print_help()
+        cursor.close()
+        conn.close()
 
     except psycopg2.OperationalError as err:
         print("Connection Error: ", err)
